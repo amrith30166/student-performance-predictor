@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance AI | Dashboard</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --accent: #00f2fe;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            margin: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 20px;
+            padding: 40px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* --- FORM STYLES --- */
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 210, 255, 0.15);
+            background: rgba(15, 23, 42, 1);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -6px rgba(0, 210, 255, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* --- RESULT CARD STYLES --- */
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 30px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 10px 0 5px 0;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .level-badge {
+            background: rgba(0, 210, 255, 0.15);
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+        }
+
+        /* --- SUGGESTIONS STYLES --- */
+        .suggestions-box {
+            width: 100%;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .suggestion-title {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .suggestion-item b {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .charts-container {
+            width: 100%;
+            max-width: 280px;
+            margin-top: 20px;
+        }
+
+        .placeholder-state {
+            text-align: center;
+            color: var(--text-muted);
+            margin: auto;
+        }
+
+        @media(max-width: 850px) {
+            .layout { grid-template-columns: 1fr; }
+            .container { padding: 25px; margin: 10px; }
+            h2 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Academic Performance AI</h2>
+
+    <div class="layout">
+        <div class="form-section">
+            <form action="/predict" method="post">
+                <div class="input-group">
+                    <label>Daily Study Hours</label>
+                    <input type="number" name="hours" placeholder="e.g. 6.5" step="0.1" required>
+                </div>
+                <div class="input-group">
+                    <label>Attendance Percentage (%)</label>
+                    <input type="number" name="attendance" placeholder="0-100" max="100" required>
+                </div>
+                <div class="input-group">
+                    <label>Previous Score (%)</label>
+                    <input type="number" name="previous" placeholder="0-100" max="100" required>
+                </div>
+                <button type="submit">Analyze Performance</button>
+            </form>
+        </div>
+
+        <div class="result-section">
+            <div class="result-card">
+                {% if prediction_text %}
+                    <span class="suggestion-title">Analysis Result</span>
+                    <h3 class="score-display">{{ score }}%</h3>
+                    <span class="level-badge">{{ level }}</span>
+
+                    <div class="suggestions-box">
+                        <span class="suggestion-title">AI Coaching Suggestions</span>
+                        <div id="suggestionList"></div>
+                    </div>
+
+                    <div class="charts-container">
+                        <canvas id="gaugeChart"></canvas>
+                    </div>
+
+                    <script>
+                        const score = {{ score }};
+                        const attendance = {{ request.form.get('attendance', 0) | float }};
+                        const list = document.getElementById('suggestionList');
+
+                        // Smart Logic Engine
+                        let tips = [];
+                        
+                        if (score < 55) {
+                            tips.push("<b>Immediate Action:</b> Prioritize a 1-on-1 review with your instructor to identify knowledge gaps.");
+                            tips.push("<b>Study Tip:</b> Use active recall (flashcards) instead of just re-reading notes.");
+                        } else if (score < 85) {
+                            tips.push("<b>Optimization:</b> Increase study blocks by 45 mins to push into the top tier.");
+                            tips.push("<b>Exam Prep:</b> Focus on time-management during practice tests.");
+                        } else {
+                            tips.push("<b>Elite Status:</b> Maintain consistency. Consider advanced research or peer tutoring to master the topics.");
+                        }
+
+                        if (attendance < 85) {
+                            tips.push("<b>Attendance Fix:</b> You're missing vital context. Aim for 90%+ attendance to see an automatic score bump.");
+                        }
+
+                        // Render Suggestions
+                        tips.forEach(text => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.innerHTML = `<span>${text}</span>`;
+                            list.appendChild(div);
+                        });
+
+                        // Professional Gauge Chart
+                        new Chart(document.getElementById('gaugeChart'), {
+                            type: 'doughnut',
+                            data: {
+                                datasets: [{
+                                    data: [score, 100 - score],
+                                    backgroundColor: ['#00d2ff', 'rgba(255,255,255,0.05)'],
+                                    borderWidth: 0,
+                                    borderRadius: 20
+                                }]
+                            },
+                            options: {
+                                cutout: '82%',
+                                plugins: { legend: { display: false } },
+                                animation: { duration: 2000, easing: 'easeOutQuart' }
+                            }
+                        });
+                    </script>
+                {% else %}
+                    <div class="placeholder-state">
+                        <div style="font-size: 3rem; opacity: 0.2; margin-bottom: 20px;">📊</div>
+                        <p>Ready for analysis.<br>Enter student data to generate AI insights.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
